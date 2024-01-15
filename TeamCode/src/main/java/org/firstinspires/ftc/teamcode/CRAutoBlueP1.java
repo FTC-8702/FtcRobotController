@@ -15,44 +15,15 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 
-/*
- * This OpMode illustrates the basics of AprilTag recognition and pose estimation,
- * including Java Builder structures for specifying Vision parameters.
- *
- * For an introduction to AprilTags, see the FTC-DOCS link below:
- * https://ftc-docs.firstinspires.org/en/latest/apriltag/vision_portal/apriltag_intro/apriltag-intro.html
- *
- * In this sample, any visible tag ID will be detected and displayed, but only tags that are included in the default
- * "TagLibrary" will have their position and orientation information displayed.  This default TagLibrary contains
- * the current Season's AprilTags and a small set of "test Tags" in the high number range.
- *
- * When an AprilTag in the TagLibrary is detected, the SDK provides location and orientation of the tag, relative to the camera.
- * This information is provided in the "ftcPose" member of the returned "detection", and is explained in the ftc-docs page linked below.
- * https://ftc-docs.firstinspires.org/apriltag-detection-values
- *
- * To experiment with using AprilTags to navigate, try out these two driving samples:
- * RobotAutoDriveToAprilTagOmni and RobotAutoDriveToAprilTagTank
- *
- * There are many "default" VisionPortal and AprilTag configuration parameters that may be overridden if desired.
- * These default parameters are shown as comments in the code below.
- *
- * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
- */
+
 @Autonomous(name = "CRAutoBlueP1", group = "Concept")
 public class CRAutoBlueP1 extends LinearOpMode {
 
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
+    private AprilTagProcessor aprilTag; //variable stores instance of April Tag Processor
+    private VisionPortal visionPortal; //Variable stores instance of the vision portal
 
-    /**
-     * The variable to store our instance of the AprilTag processor.
-     */
-    private AprilTagProcessor aprilTag;
-
-    /**
-     * The variable to store our instance of the vision portal.
-     */
-    private VisionPortal visionPortal;
+    int myTagID; //Will store the int type for the id number
 
     @Override
     public void runOpMode() {
@@ -68,10 +39,32 @@ public class CRAutoBlueP1 extends LinearOpMode {
         if (opModeIsActive()) {
             while (opModeIsActive()) {
 
-                telemetryAprilTag();
+                myTagID = telemetryAprilTag();
 
-                // Push telemetry to the Driver Station.
-                telemetry.update();
+                telemetry.update(); // Push telemetry to the Driver Station.
+
+                if(myTagID == 1)
+                {
+                    telemetry.addLine("ALEX: The Path for Tag ID 1 will be started");
+                    telemetry.update();
+                }
+                else if(myTagID == 2)
+                {
+                    telemetry.addLine("ALEX 2: The path for ID 2 will be started");
+                    telemetry.update();
+                }
+                else if(myTagID == 3)
+                {
+                    telemetry.addLine("Alex 3: The path for ID 3 will be started");
+                    telemetry.update();
+                }
+                else
+                {
+                    telemetry.addLine("The April Tag did not match 1,2,or 3");
+                    telemetry.update();
+                }
+
+
 
                 // Save CPU resources; can resume streaming when needed.
                 if (gamepad1.dpad_down) {
@@ -97,8 +90,6 @@ public class CRAutoBlueP1 extends LinearOpMode {
 
         // Create the AprilTag processor
         aprilTag = new AprilTagProcessor.Builder()
-
-                // The following default settings are available to un-comment and edit as needed.
                 .setDrawAxes(true)
                 .setDrawCubeProjection(false)
                 .setDrawTagOutline(true)
@@ -133,25 +124,17 @@ public class CRAutoBlueP1 extends LinearOpMode {
             builder.setCamera(BuiltinCameraDirection.BACK);
         }
 
-        // Choose a camera resolution. Not all cameras support all resolutions.
-        builder.setCameraResolution(new Size(640, 480));
-
-        // Enable the RC preview (LiveView).  Set "false" to omit camera monitoring.
-        builder.enableLiveView(true);
-
-        // Set the stream format; MJPEG uses less bandwidth than default YUY2.
-        //builder.setStreamFormat(VisionPortal.StreamFormat.YUY2);
+        builder.setCameraResolution(new Size(640, 480)); // Choose a camera resolution. Not all cameras support all resolutions.
+        builder.enableLiveView(true); // Enable the RC preview (LiveView).  Set "false" to omit camera monitoring.
+        builder.setStreamFormat(VisionPortal.StreamFormat.MJPEG); // Set the stream format; MJPEG uses less bandwidth than default YUY2.
 
         // Choose whether or not LiveView stops if no processors are enabled.
         // If set "true", monitor shows solid orange screen if no processors enabled.
         // If set "false", monitor shows camera view without annotations.
         //builder.setAutoStopLiveView(false);
 
-        // Set and enable the processor.
-        builder.addProcessor(aprilTag);
-
-        // Build the Vision Portal, using the above settings.
-        visionPortal = builder.build();
+        builder.addProcessor(aprilTag); // Set and enable the processor.
+        visionPortal = builder.build();  // Build the Vision Portal, using the above settings.
 
         // Disable or re-enable the aprilTag processor at any time.
         //visionPortal.setProcessorEnabled(aprilTag, true);
@@ -162,7 +145,9 @@ public class CRAutoBlueP1 extends LinearOpMode {
     /**
      * Add telemetry about AprilTag detections.
      */
-    private void telemetryAprilTag() {
+    private int telemetryAprilTag() {
+
+        int retVal = 100; //basic value if the size == 0
 
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
         telemetry.addData("# AprilTags Detected", currentDetections.size());
@@ -184,6 +169,13 @@ public class CRAutoBlueP1 extends LinearOpMode {
         telemetry.addLine("\nkey:\nXYZ = X (Right), Y (Forward), Z (Up) dist.");
         telemetry.addLine("PRY = Pitch, Roll & Yaw (XYZ Rotation)");
         telemetry.addLine("RBE = Range, Bearing & Elevation");
+
+        if(currentDetections.size() > 0)
+        {
+            retVal = currentDetections.get(0).id;
+        }
+
+        return retVal;
 
     }   // end method telemetryAprilTag()
 
