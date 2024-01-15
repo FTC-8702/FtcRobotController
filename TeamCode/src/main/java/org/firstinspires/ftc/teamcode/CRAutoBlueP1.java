@@ -99,7 +99,7 @@ public class CRAutoBlueP1 extends LinearOpMode {
         aprilTag = new AprilTagProcessor.Builder()
 
                 // The following default settings are available to un-comment and edit as needed.
-                .setDrawAxes(false)
+                .setDrawAxes(true)
                 .setDrawCubeProjection(false)
                 .setDrawTagOutline(true)
                 .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
