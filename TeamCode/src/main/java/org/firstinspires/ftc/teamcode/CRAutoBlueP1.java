@@ -40,7 +40,6 @@ public class CRAutoBlueP1 extends LinearOpMode {
             //while (opModeIsActive()) {
 
                 for(int i = 0; i < 40; i++) //1 factor of 10 = checking for april tag for 1x10 = sec, etc
-
                 {
                     myTagID = telemetryAprilTag();
                     telemetry.update(); // Push telemetry to the Driver Station.
@@ -49,10 +48,10 @@ public class CRAutoBlueP1 extends LinearOpMode {
                         telemetry.addLine(String.format("\n Break out of for loop ==== (ID %d)", myTagID));
                         telemetry.update();
                         break;
-                    }
+                    } // end if
 
                     sleep(100); //short break
-                }
+                } // end for
 
                 if(myTagID == 1)
                 {
