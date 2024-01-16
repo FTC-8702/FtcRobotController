@@ -37,43 +37,30 @@ public class CRAutoBlueP1 extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
-            //while (opModeIsActive()) {
 
-                for(int i = 0; i < 40; i++) //1 factor of 10 = checking for april tag for 1x10 = sec, etc
-                {
-                    myTagID = telemetryAprilTag();
-                    telemetry.update(); // Push telemetry to the Driver Station.
-                    if((myTagID < 7) && (myTagID > 0)) //If tag found b4 counter is done, breaks
-                    {
-                        telemetry.addLine(String.format("\n Break out of for loop ==== (ID %d)", myTagID));
-                        telemetry.update();
-                        break;
-                    } // end if
+            scanAprilTag();
 
-                    sleep(100); //short break
-                } // end for
-
-                if(myTagID == 1)
-                {
-                    telemetry.addLine("ALEX: The Path for Tag ID 1 will be started");
-                    //encoder code here for ID 1
-                }
-                else if(myTagID == 2)
-                {
-                    telemetry.addLine("ALEX 2: The path for ID 2 will be started");
-                    //encoder code here for ID 2
-                }
-                else if(myTagID == 3)
-                {
-                    telemetry.addLine("Alex 3: The path for ID 3 will be started");
-                    //encoder code here for ID 3
-                }
-                else
-                {
-                    telemetry.addLine("The April Tag did not match 1,2,or 3");
-                    //encoder code here for default
-                }
-                telemetry.update();
+            if(myTagID == 1)
+            {
+                telemetry.addLine("ALEX: The Path for Tag ID 1 will be started");
+                //encoder code here for ID 1
+            }
+            else if(myTagID == 2)
+            {
+                telemetry.addLine("ALEX 2: The path for ID 2 will be started");
+                //encoder code here for ID 2
+            }
+            else if(myTagID == 3)
+            {
+                telemetry.addLine("Alex 3: The path for ID 3 will be started");
+                //encoder code here for ID 3
+            }
+            else
+            {
+                telemetry.addLine("The April Tag did not match 1,2,or 3");
+                //encoder code here for default
+            }
+            telemetry.update();
 
 
 
@@ -86,7 +73,6 @@ public class CRAutoBlueP1 extends LinearOpMode {
 
                 // Share the CPU.
                 sleep(20);
-            //} //end while
         }
 
         // Save more CPU resources when camera is no longer needed.
@@ -189,5 +175,28 @@ public class CRAutoBlueP1 extends LinearOpMode {
         return retVal;
 
     }   // end method telemetryAprilTag()
+
+    private int scanAprilTag()
+    {
+
+        for(int i = 0; i < 40; i++) //1 factor of 10 = checking for april tag for 1x10 = sec, etc
+        {
+            myTagID = telemetryAprilTag();
+            telemetry.update(); // Push telemetry to the Driver Station.
+            if((myTagID < 7) && (myTagID > 0)) //If tag found b4 counter is done, breaks
+            {
+                telemetry.addLine(String.format("\n Break out of for loop ==== (ID %d)", myTagID));
+                telemetry.update();
+                break;
+            } // end if
+
+            sleep(100); //short break
+        } // end for
+
+        return myTagID;
+
+    }// end scan
+
+
 
 }   // end class
