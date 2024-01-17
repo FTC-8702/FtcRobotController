@@ -73,54 +73,16 @@ public class TFodFile extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
-            while (opModeIsActive()) {
 
-                //telemetryTfod();
-                //private void telemetryTfod() {
+                int SpikeMarkLocationFinal = scanTFOD(); //for loop method where Spike Mark Location = telemetryTFOD();
 
 
-                    List<Recognition> currentRecognitions = tfod.getRecognitions();
-                    telemetry.addData("# Objects Detected", currentRecognitions.size());
-
-                    // Step through the list of recognitions and display info for each one.
-                    for (Recognition recognition : currentRecognitions) {
-                        double x = (recognition.getLeft() + recognition.getRight()) / 2 ;
-                        double y = (recognition.getTop()  + recognition.getBottom()) / 2 ;
-
-                        telemetry.addData(""," ");
-                        telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
-                        telemetry.addData("- Position", "%.0f / %.0f", x, y);
-                        telemetry.addData("- Size", "%.0f x %.0f", recognition.getWidth(), recognition.getHeight());
-
-
-                        //first if makes sure Height of object is ySizeMax > Height > ySizeMin
-                        //second if makes sure Width of object is xSizeMax > Width > xSizeMin
-                        //third if makes sure object is between two y coordinates
-
-                        if( (((int)recognition.getHeight() < ySizeMax) && ((int)recognition.getHeight() > ySizeMin)) &&
-                        (((int)recognition.getWidth() < xSizeMax) && ((int)recognition.getWidth() > xSizeMin)) &&
-                        (((int)y < yMax) && ((int)y > yMin)) )
-                        {
-                            if( ((x < xMaxSMR) && (x > xMinSMR)) ) //Checks if marker is on right spike mark
-                            {
-                                SpikeMarkLocation = RightMark;
-                                break;
-                            }
-                            if( ((x < xMaxSMC) && (x > xMinSMC)) ) //checks if marker is on center marker, else its on the left one
-                            {
-                                SpikeMarkLocation = CenterMark;
-                                break;
-                            }
-
-                        }
-                    }   // end for() loop
-
-                if(SpikeMarkLocation == RightMark)
+                if(SpikeMarkLocationFinal == RightMark)
                 {
                     telemetry.addLine("Path for Spike Mark Right is starting");
 
                 }
-                else if (SpikeMarkLocation == CenterMark)
+                else if (SpikeMarkLocationFinal == CenterMark)
                 {
                     telemetry.addLine("Path for Spike Mark Center is starting");
                 }
@@ -135,7 +97,7 @@ public class TFodFile extends LinearOpMode {
                 //}   // end method telemetryTfod()
 
                 // Push telemetry to the Driver Station.
-                telemetry.update();
+                //telemetry.update();
 
                 // Save CPU resources; can resume streaming when needed.
                 if (gamepad1.dpad_down) {
@@ -147,7 +109,6 @@ public class TFodFile extends LinearOpMode {
                 // Share the CPU.
                 sleep(20);
             }
-        }
 
         // Save more CPU resources when camera is no longer needed.
         visionPortal.close();
@@ -222,6 +183,70 @@ public class TFodFile extends LinearOpMode {
     /**
      * Add telemetry about TensorFlow Object Detection (TFOD) recognitions.
      */
+    private int telemetryTFOD()
+    {
+        int SpikeMarkLocationTelemetry = LeftMark;
+        List<Recognition> currentRecognitions = tfod.getRecognitions();
+        telemetry.addData("# Objects Detected", currentRecognitions.size());
+
+        // Step through the list of recognitions and display info for each one.
+        for (Recognition recognition : currentRecognitions) {
+            double x = (recognition.getLeft() + recognition.getRight()) / 2;
+            double y = (recognition.getTop() + recognition.getBottom()) / 2;
+
+            telemetry.addData("", " ");
+            telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
+            telemetry.addData("- Position", "%.0f / %.0f", x, y);
+            telemetry.addData("- Size", "%.0f x %.0f", recognition.getWidth(), recognition.getHeight());
+
+
+            //first if makes sure Height of object is ySizeMax > Height > ySizeMin
+            //second if makes sure Width of object is xSizeMax > Width > xSizeMin
+            //third if makes sure object is between two y coordinates
+
+            if ((((int) recognition.getHeight() < ySizeMax) && ((int) recognition.getHeight() > ySizeMin)) &&
+                    (((int) recognition.getWidth() < xSizeMax) && ((int) recognition.getWidth() > xSizeMin)) &&
+                    (((int) y < yMax) && ((int) y > yMin))) {
+                if (((x < xMaxSMR) && (x > xMinSMR))) //Checks if marker is on right spike mark
+                {
+                    SpikeMarkLocationTelemetry = RightMark;
+                    break;
+                }
+                if (((x < xMaxSMC) && (x > xMinSMC))) //checks if marker is on center marker, else its on the left one
+                {
+                    SpikeMarkLocationTelemetry = CenterMark;
+                    break;
+                }
+
+            }//end big if
+        }   // end for() loop
+
+        return SpikeMarkLocationTelemetry;
+    }
+
+
+    //For loop for telemetry TFOD
+    private int scanTFOD()
+    {
+
+        int SpikeMarkLocationScan = LeftMark;
+        for(int i = 0; i < 40; i++) //1 factor of 10 = checking for april tag for 1x10 = sec, etc
+        {
+            SpikeMarkLocationScan = telemetryTFOD();
+            telemetry.update(); // Push telemetry to the Driver Station.
+            if( SpikeMarkLocationScan != LeftMark) //If tag found b4 counter is done, breaks
+            {
+                telemetry.addLine(String.format("\n Break out of for loop ==== (ID %d)", SpikeMarkLocation));
+                telemetry.update();
+                break;
+            } // end if
+
+            sleep(100); //short break
+        } // end for
+
+        return SpikeMarkLocationScan;
+
+    }// end scan
 
 
 }   // end class
