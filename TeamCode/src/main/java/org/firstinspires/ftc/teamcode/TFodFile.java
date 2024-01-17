@@ -38,15 +38,28 @@ public class TFodFile extends LinearOpMode {
             "Blue Marker",
     };
 
-    /**
-     * The variable to store our instance of the TensorFlow Object Detection processor.
-     */
-    private TfodProcessor tfod;
+    private TfodProcessor tfod; //The variable to store our instance of the TensorFlow Object Detection processor.
 
-    /**
-     * The variable to store our instance of the vision portal.
-     */
-    private VisionPortal visionPortal;
+    private VisionPortal visionPortal; //The variable to store our instance of the vision portal.
+
+    float confidMin = 0.80f; //sets min confidence level
+    int xSizeMin = 100; //sets min x width
+    int xSizeMax = 175; //sets max x width
+    int ySizeMin = 90; //sets min y height
+    int ySizeMax = 160; //sets max y height
+    int yMin = 280; //sets y coord min
+    int yMax = 400; //sets y coord max
+    int xMinSMC = 1; //sets min x coord for spike mark right
+    int xMaxSMC = 300; //sets max x coord for spike mark right
+    int xMinSMR = 301; //sets min x coord for spike mark center
+    int xMaxSMR = 640; //sets max x coord for spike mark center
+    int RightMark = 0;
+    int CenterMark = 1;
+    int LeftMark = 2;
+    int SpikeMarkLocation = LeftMark;
+
+
+
 
     @Override
     public void runOpMode() {
@@ -62,7 +75,64 @@ public class TFodFile extends LinearOpMode {
         if (opModeIsActive()) {
             while (opModeIsActive()) {
 
-                telemetryTfod();
+                //telemetryTfod();
+                //private void telemetryTfod() {
+
+
+                    List<Recognition> currentRecognitions = tfod.getRecognitions();
+                    telemetry.addData("# Objects Detected", currentRecognitions.size());
+
+                    // Step through the list of recognitions and display info for each one.
+                    for (Recognition recognition : currentRecognitions) {
+                        double x = (recognition.getLeft() + recognition.getRight()) / 2 ;
+                        double y = (recognition.getTop()  + recognition.getBottom()) / 2 ;
+
+                        telemetry.addData(""," ");
+                        telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
+                        telemetry.addData("- Position", "%.0f / %.0f", x, y);
+                        telemetry.addData("- Size", "%.0f x %.0f", recognition.getWidth(), recognition.getHeight());
+
+
+                        //first if makes sure Height of object is ySizeMax > Height > ySizeMin
+                        //second if makes sure Width of object is xSizeMax > Width > xSizeMin
+                        //third if makes sure object is between two y coordinates
+
+                        if( (((int)recognition.getHeight() < ySizeMax) && ((int)recognition.getHeight() > ySizeMin)) &&
+                        (((int)recognition.getWidth() < xSizeMax) && ((int)recognition.getWidth() > xSizeMin)) &&
+                        (((int)y < yMax) && ((int)y > yMin)) )
+                        {
+                            if( ((x < xMaxSMR) && (x > xMinSMR)) ) //Checks if marker is on right spike mark
+                            {
+                                SpikeMarkLocation = RightMark;
+                                break;
+                            }
+                            if( ((x < xMaxSMC) && (x > xMinSMC)) ) //checks if marker is on center marker, else its on the left one
+                            {
+                                SpikeMarkLocation = CenterMark;
+                                break;
+                            }
+
+                        }
+                    }   // end for() loop
+
+                if(SpikeMarkLocation == RightMark)
+                {
+                    telemetry.addLine("Path for Spike Mark Right is starting");
+
+                }
+                else if (SpikeMarkLocation == CenterMark)
+                {
+                    telemetry.addLine("Path for Spike Mark Center is starting");
+                }
+                else
+                {
+                    telemetry.addLine("Path for Spike Mark Left is starting");
+                }
+                telemetry.update();
+
+
+
+                //}   // end method telemetryTfod()
 
                 // Push telemetry to the Driver Station.
                 telemetry.update();
@@ -142,7 +212,7 @@ public class TFodFile extends LinearOpMode {
         visionPortal = builder.build();
 
         // Set confidence threshold for TFOD recognitions, at any time.
-        tfod.setMinResultConfidence(0.80f);
+        tfod.setMinResultConfidence(confidMin);
 
         // Disable or re-enable the TFOD processor at any time.
         //visionPortal.setProcessorEnabled(tfod, true);
@@ -152,25 +222,6 @@ public class TFodFile extends LinearOpMode {
     /**
      * Add telemetry about TensorFlow Object Detection (TFOD) recognitions.
      */
-    private void telemetryTfod() {
 
-
-        List<Recognition> currentRecognitions = tfod.getRecognitions();
-        telemetry.addData("# Objects Detected", currentRecognitions.size());
-
-        // Step through the list of recognitions and display info for each one.
-        for (Recognition recognition : currentRecognitions) {
-            double x = (recognition.getLeft() + recognition.getRight()) / 2 ;
-            double y = (recognition.getTop()  + recognition.getBottom()) / 2 ;
-
-            telemetry.addData(""," ");
-            telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
-            telemetry.addData("- Position", "%.0f / %.0f", x, y);
-            telemetry.addData("- Size", "%.0f x %.0f", recognition.getWidth(), recognition.getHeight());
-        }   // end for() loop
-
-
-
-    }   // end method telemetryTfod()
 
 }   // end class
