@@ -39,11 +39,11 @@ public class CRAutoRedP1 extends LinearOpMode {
 
     float confidMin = 0.80f; //sets min confidence level
     int xSizeMin = 100; //sets min x width
-    int xSizeMax = 175; //sets max x width
+    int xSizeMax = 200; //sets max x width
     int ySizeMin = 90; //sets min y height
-    int ySizeMax = 160; //sets max y height
-    int yMin = 280; //sets y coord min
-    int yMax = 400; //sets y coord max
+    int ySizeMax = 240; //sets max y height
+    int yMin = 80; //sets y coord min
+    int yMax = 350; //sets y coord max
     int xMinSMC = 1; //sets min x coord for spike mark right
     int xMaxSMC = 300; //sets max x coord for spike mark right
     int xMinSMR = 301; //sets min x coord for spike mark center

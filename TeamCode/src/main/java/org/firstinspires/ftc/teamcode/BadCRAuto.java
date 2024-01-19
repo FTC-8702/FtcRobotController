@@ -71,45 +71,40 @@ public class BadCRAuto extends LinearOpMode {
         if (opModeIsActive()) {
             Dropper.setPosition(0.4);
             EncoderDrive(DRIVE_SPEED, 24,24,24,24,4.0); // Drive forward 24 inches
-            EncoderDrive(TURN_SPEED, 22,-22,22,-22, 3.0); // turn left 90 degrees to scan Tag
+            EncoderDrive(TURN_SPEED, 24,-24,24,-24, 3.0); // turn left 90 degrees to scan Tag
             scanAprilTag();
-            EncoderDrive(TURN_SPEED,44,-44,44,-44,3.0); // turn with Front side facing backdrop
-            EncoderDrive(DRIVE_SPEED, 23,23,23,23,4.0);// Drive up to Backdrop
 
             if(myTagID == 1)
             {
                 telemetry.addLine("ALEX: The Path for Tag ID 1 will be started");
-                EncoderDrive(TURN_SPEED,-44,44,-44,44,3);
-                EncoderDrive(DRIVE_SPEED,-3,-3,-3,-3,3);
+                EncoderDrive(DRIVE_SPEED, -26,-26,-26,-26,4.0);// Drive up to Backdrop
                 EncoderDrive(STRAFE_SPEED, 5,-5,-5,5, 3.0);
                 dropPixel();
-                EncoderDrive(STRAFE_SPEED,20,-20,-20,20,4.0);
-                EncoderDrive(DRIVE_SPEED,-10,-10,-10,-10,3.0);
+                EncoderDrive(STRAFE_SPEED,25,-25,-25,25,4.0);
+                EncoderDrive(DRIVE_SPEED,-7,-7,-7,-7,3.0);
             } else if(myTagID == 2) {
                 telemetry.addLine("ALEX 2: The path for ID 2 will be started");
-                EncoderDrive(TURN_SPEED,-44,44,-44,44,3);
-                EncoderDrive(DRIVE_SPEED,-3,-3,-3,-3,3);
+                EncoderDrive(DRIVE_SPEED, -27,-27,-27,-27,4.0);// Drive up to Backdrop
+                EncoderDrive(STRAFE_SPEED, 2,-2,-2,2, 3.0);
                 dropPixel();
-                EncoderDrive(STRAFE_SPEED,-25,25,25,-25, 4);// Strafe right 12 inches
-                EncoderDrive(DRIVE_SPEED,-10,-10,-10,-10,3.0);
+                EncoderDrive(STRAFE_SPEED,30,-30,-30,30, 4);// Strafe right 12 inches
+                EncoderDrive(DRIVE_SPEED,-7,-7,-7,-7,3.0);
 
 
             } else if(myTagID == 3) {
                 telemetry.addLine("Alex 3: The path for ID 3 will be started");
-                EncoderDrive(TURN_SPEED,-44,44,-44,44,3);
-                EncoderDrive(DRIVE_SPEED,-3,-3,-3,-3,3);
+                EncoderDrive(DRIVE_SPEED, -26,-26,-26,-26,4.0);// Drive up to Backdrop
                 EncoderDrive(STRAFE_SPEED, -5,5,5,-5, 3.0);
                 dropPixel();
-                EncoderDrive(STRAFE_SPEED,30,-30,-30,30, 4);
-                EncoderDrive(DRIVE_SPEED,-10,-10,-10,-10,3.0);
+                EncoderDrive(STRAFE_SPEED,40,-40,-40,40, 4);
+                EncoderDrive(DRIVE_SPEED,-7,-7,-7,-7,3.0);
 
             } else {
                 telemetry.addLine("The April Tag did not match 1,2,or 3");
-                EncoderDrive(TURN_SPEED,-44,44,-44,44,3);
-                EncoderDrive(DRIVE_SPEED,-3,-3,-3,-3,3);
+                EncoderDrive(DRIVE_SPEED, -26,-26,-26,-26,4.0);// Drive up to Backdrop
                 dropPixel();
-                EncoderDrive(STRAFE_SPEED,25,-25,-25,25, 4);// Strafe right 12 inches
-                EncoderDrive(DRIVE_SPEED,-10,-10,-10,-10,3.0);
+                EncoderDrive(STRAFE_SPEED,30,-30,-30,30, 4);// Strafe right 12 inches
+                EncoderDrive(DRIVE_SPEED,-7,-7,-7,-7,3.0);
 
             }
             telemetry.update();
@@ -213,8 +208,8 @@ public class BadCRAuto extends LinearOpMode {
 
     public void initDropper() {
         outtakeMotor = hardwareMap.get(DcMotor.class, "outtakeMotor");
-        Dropper = hardwareMap.get(Servo.class, "Servo");
-
+        Dropper = hardwareMap.get(Servo.class, "Dropper");
+        outtakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         outtakeMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         outtakeMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         ;
@@ -337,7 +332,7 @@ public class BadCRAuto extends LinearOpMode {
     } //end EncoderDrive()
 
     public void dropPixel() {
-        outtakeMotor.setTargetPosition(3000);
+        outtakeMotor.setTargetPosition(1200);
         outtakeMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         outtakeMotor.setPower(0.75);
 
@@ -348,17 +343,21 @@ public class BadCRAuto extends LinearOpMode {
         //wait for linear slides to go up then activate this code:
 
         Dropper.setPosition(0); // Drops pixel
-        runtime2.reset();
-        if (runtime2.seconds() > 2.5) {
-            Dropper.setPosition(0.58);
-            outtakeMotor.setTargetPosition(5);
-            outtakeMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            outtakeMotor.setPower(0.75);
+        while (outtakeMotor.isBusy()) {
+            telemetry.addData("Dropping", Dropper.getPosition());
+            telemetry.update();
+        }
+        sleep(1000);
+
+        EncoderDrive(DRIVE_SPEED, 3,3,3,3,4.0);// Bak up from back drop
+        sleep(1500);
+
+        Dropper.setPosition(0.58);
+        outtakeMotor.setTargetPosition(5);
+        outtakeMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        outtakeMotor.setPower(0.75);
 
             sleep(250);
-
-        }
-
 
     } //end dropPixel()
 

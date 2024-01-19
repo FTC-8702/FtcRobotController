@@ -26,7 +26,7 @@ public class TFodFile extends LinearOpMode {
 
     // TFOD_MODEL_ASSET points to a model file stored in the project Asset location,
     // this is only used for Android Studio when using models in Assets.
-    private static final String TFOD_MODEL_ASSET = "RedMarker.tflite";
+    private static final String TFOD_MODEL_ASSET = "BlueMarker.tflite";
 
     // TFOD_MODEL_FILE points to a model file stored onboard the Robot Controller's storage,
     // this is used when uploading models directly to the RC using the model upload interface.
@@ -34,7 +34,7 @@ public class TFodFile extends LinearOpMode {
     //private static final String TFOD_MODEL_FILE = "/sdcard/FIRST/tflitemodels/myCustomModel.tflite";
 
     // Define the labels recognized in the model for TFOD (must be in training order!)
-    private static final String[] LABELS = {"Red Marker",};
+    private static final String[] LABELS = {"Blue Marker",};
 
     private TfodProcessor tfod; //The variable to store our instance of the TensorFlow Object Detection processor.
 
@@ -228,7 +228,7 @@ public class TFodFile extends LinearOpMode {
     {
 
         int SpikeMarkLocationScan = LeftMark;
-        for(int i = 0; i < 40; i++) //1 factor of 10 = checking for april tag for 1x10 = sec, etc
+        for(int i = 0; i < 10000; i++) //1 factor of 10 = checking for april tag for 1x10 = sec, etc
         {
             SpikeMarkLocationScan = telemetryTFOD();
             telemetry.update(); // Push telemetry to the Driver Station.
