@@ -23,9 +23,40 @@ import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 import java.util.List;
 
 
-@Autonomous(name = "CRAutoBlueP1", group = "Concept")
-public class CRAutoBlueP1 extends LinearOpMode {
-    //encoder drive variables
+@Autonomous(name = "CRAutoBlueP2", group = "Concept")
+public class CRAutoBlueP2 extends LinearOpMode {
+
+    //April Tag Variables
+    private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
+    private AprilTagProcessor aprilTag; //variable stores instance of April Tag Processor
+    private VisionPortal visionPortal; //Variable stores instance of the vision portal
+
+    int myTagID; //Will store the int type for the id number
+
+
+    //TFOD Variables
+    private static final String TFOD_MODEL_ASSET = "BlueMarker.tflite";
+    private static final String[] LABELS = {"Blue Marker",};
+
+    private TfodProcessor tfod; //The variable to store our instance of the TensorFlow Object Detection processor.
+
+    private VisionPortal visionPortal2; //The variable to store our instance of the vision portal.
+
+    float confidMin = 0.80f; //sets min confidence level
+    int xSizeMin = 100; //sets min x width
+    int xSizeMax = 200; //sets max x width
+    int ySizeMin = 90; //sets min y height
+    int ySizeMax = 240; //sets max y height
+    int yMin = 80; //sets y coord min
+    int yMax = 350; //sets y coord max
+    int xMinSMC = 1; //sets min x coord for spike mark right
+    int xMaxSMC = 300; //sets max x coord for spike mark right
+    int xMinSMR = 301; //sets min x coord for spike mark center
+    int xMaxSMR = 640; //sets max x coord for spike mark center
+    int RightMark = 4;
+    int CenterMark = 5;
+    int LeftMark = 6;
+    int SpikeMarkLocation = LeftMark;
     private DcMotor leftFront = null;
     private DcMotor rightFront = null;
     private DcMotor leftRear = null;
@@ -47,42 +78,10 @@ public class CRAutoBlueP1 extends LinearOpMode {
 
     static final double COUNT_PER_INCH = (COUNT_PER_REVOLUTION * GEAR_RATIO) / (WHEEL_DIAMETER_INCH * Math.PI); // conversion for ticks per inch
     static final double DRIVE_SPEED = 0.6; // Speed when moving forward
-    static final double TURN_SPEED = 0.5; // Speed when turning
+    static final double TURN_SPEED = 0.6; // Speed when turning
 
     static final double STRAFE_SPEED = 0.5; // Speed when strafe
 
-
-    //April Tag Variables
-    private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
-    private AprilTagProcessor aprilTag; //variable stores instance of April Tag Processor
-    private VisionPortal visionPortal; //Variable stores instance of the vision portal
-
-    int myTagID; //Will store the int type for the id number
-
-
-    //TFOD Variables
-    private static final String TFOD_MODEL_ASSET = "BlueMarker.tflite";
-    private static final String[] LABELS = {"Blue Marker",};
-
-    private TfodProcessor tfod; //The variable to store our instance of the TensorFlow Object Detection processor.
-
-    private VisionPortal visionPortal2; //The variable to store our instance of the vision portal.
-
-    float confidMin = 0.80f; //sets min confidence level
-    int xSizeMin = 100; //sets min x width
-    int xSizeMax = 175; //sets max x width
-    int ySizeMin = 90; //sets min y height
-    int ySizeMax = 160; //sets max y height
-    int yMin = 200; //sets y coord min
-    int yMax = 400; //sets y coord max
-    int xMinSMR = 1; //sets min x coord for spike mark right
-    int xMaxSMR = 300; //sets max x coord for spike mark right
-    int xMinSMC = 301; //sets min x coord for spike mark center
-    int xMaxSMC = 640; //sets max x coord for spike mark center
-    int RightMark = 3;
-    int CenterMark = 2;
-    int LeftMark = 1;
-    int SpikeMarkLocation = LeftMark;
 
 
 
@@ -93,17 +92,19 @@ public class CRAutoBlueP1 extends LinearOpMode {
         //TFOD op mode part
         initSpikeLift();
         initTfod();
+
         initEncoderDrive();
+        // Initiate dropper early to keep yellow pixel in place
         initDropper();
+        Dropper.setPosition(0.4);
 
 
         // Wait for the DS start button to be touched.
         telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
         telemetry.addData(">", "Touch Play to start OpMode");
         telemetry.update();
-        waitForStart();
-        Dropper.setPosition(0.4);
 
+        waitForStart();
 
         if (opModeIsActive())
         {
@@ -114,13 +115,11 @@ public class CRAutoBlueP1 extends LinearOpMode {
             {
                 telemetry.addLine("Path for Spike Mark Right is starting");
                 startPosition();
-                EncoderDrive(DRIVE_SPEED,3,3,3,3,4.0); // Forward
                 EncoderDrive(STRAFE_SPEED,-1,1,1,-1,4.0); // Strafe left
                 spikeLift();
-                EncoderDrive(STRAFE_SPEED,1,-1,-1,1,4.0); // Strafe right
-                EncoderDrive(DRIVE_SPEED,-3,-3,-3,-3,4.0); // Backwards
                 EncoderDrive(TURN_SPEED,-23,23,-23,23,4.0); // Turn facing Tag
-                myTagID = 1;
+                myTagID = 6;
+
 
 
             }
@@ -128,99 +127,43 @@ public class CRAutoBlueP1 extends LinearOpMode {
             {
                 telemetry.addLine("Path for Spike Mark Center is starting");
                 startPosition();
-                EncoderDrive(DRIVE_SPEED,-5,-5,-5,-5,3.0); // Backward
+                EncoderDrive(DRIVE_SPEED,5,5,5,5,3.0); // Forward
                 EncoderDrive(STRAFE_SPEED,-16,16,16,-16,4.0); // Strafe left
                 spikeLift();
                 EncoderDrive(STRAFE_SPEED,16,-16,-16,16,4.0); // Strafe right
-                EncoderDrive(DRIVE_SPEED,5,5,5,5,3.0); // Forwards
-                EncoderDrive(TURN_SPEED,-23,23,-23,23,4.0);// Turn facing tag
-                myTagID = 2;
-
+                EncoderDrive(DRIVE_SPEED,-5,-5,-5,-5,3.0); // Backward
+                EncoderDrive(TURN_SPEED,-23,23,-23,23,4.0);// Turn facing
+                myTagID = 5;
             }
             else
             {
                 telemetry.addLine("Path for Spike Mark Left is starting");
                 startPosition();
-                EncoderDrive(DRIVE_SPEED,3,3,3,3,4.0); // forward
+                EncoderDrive(DRIVE_SPEED,-3,-3,-3,-3,4.0); // Backward
                 EncoderDrive(STRAFE_SPEED,-25,25,25,-25,4.0);// strafe left
                 spikeLift();
                 EncoderDrive(STRAFE_SPEED,25,-25,-25,25,4.0); // strafe right
-                EncoderDrive(DRIVE_SPEED,-3,-3,-3,-3,4.0); // backward
+                EncoderDrive(DRIVE_SPEED,3,3,3,3,4.0); // Forward
                 EncoderDrive(TURN_SPEED,-23,23,-23,23,4.0); // turn facing tag
-                myTagID = 3;
-
-
+                myTagID = 4;
 
 
             }
             telemetry.update();
 
-            visionPortal2.close();
+            //visionPortal2.close();
 
 
 
 
-            //April Tag Portion of OP Mode
-           // initAprilTag();
-
-            //scanAprilTag();
-
-
-
-
-            if(myTagID == 1)
-            {
-                telemetry.addLine("ALEX: The Path for Tag ID 1 will be started");
-                EncoderDrive(DRIVE_SPEED, -17,-17,-17,-17,4.0);// Drive up to Backdrop
-                EncoderDrive(STRAFE_SPEED, 5,-5,-5,5, 3.0); // strafe right
-                dropPixel();
-                EncoderDrive(STRAFE_SPEED,25,-25,-25,25,4.0); // strafe right
-                EncoderDrive(DRIVE_SPEED,-7,-7,-7,-7,3.0); // park
-            }
-            }
-            else if(myTagID == 2)
-            {
-                telemetry.addLine("ALEX 2: The path for ID 2 will be started");
-                telemetry.addLine("Approaching Backdrop");
-                EncoderDrive(DRIVE_SPEED, -17,-17,-17,-17,4.0);// Drive up to Backdrop
-                EncoderDrive(STRAFE_SPEED, 2,-2,-2,2, 3.0);// strafe right
-                dropPixel();
-                EncoderDrive(STRAFE_SPEED,30,-30,-30,30, 4);// Strafe right
-                EncoderDrive(DRIVE_SPEED,-7,-7,-7,-7,3.0); // park
-            }
-            else if(myTagID == 3)
-            {
-                telemetry.addLine("Alex 3: The path for ID 3 will be started");
-                telemetry.addLine("Approaching Backdrop");
-                EncoderDrive(DRIVE_SPEED, -17,-17,-17,-17,4.0);// Drive up to Backdrop
-                EncoderDrive(STRAFE_SPEED, -1,1,1,-1, 3.0); // Strafe left
-                dropPixel();
-                EncoderDrive(STRAFE_SPEED,40,-40,-40,40, 4); // Strafe right
-                EncoderDrive(DRIVE_SPEED,-7,-7,-7,-7,3.0); // park
-            }
-            else
-            {
-                telemetry.addLine("The April Tag did not match 1,2,or 3");
-                telemetry.addLine("Approaching Backdrop");
-                EncoderDrive(DRIVE_SPEED, -17,-17,-17,-17,4.0);// Drive up to Backdrop
-                EncoderDrive(STRAFE_SPEED, 2,-2,-2,2, 3.0);// strafe right
-                dropPixel();
-                EncoderDrive(STRAFE_SPEED,30,-30,-30,30, 4);// Strafe right
-                EncoderDrive(DRIVE_SPEED,-7,-7,-7,-7,3.0); // park
-
-            }
-            telemetry.update();
-
-            //visionPortal.close();
-
-                // Share the CPU.
-                sleep(20);
-        }// end op mode
+            // Share the CPU.
+            sleep(20);
+        }
 
         // Save more CPU resources when camera is no longer needed.
         //visionPortal.close();
 
-       // end method runOpMode()
+    }   // end method runOpMode()
 
 
     //APRIL TAG METHODS
@@ -311,8 +254,7 @@ public class CRAutoBlueP1 extends LinearOpMode {
             {
                 telemetry.addLine(String.format("\n Break out of for loop ==== (ID %d)", myTagID));
                 telemetry.update();
-                //break;
-                i=40;
+                break;
             } // end if
 
             sleep(100); //short break
@@ -539,8 +481,8 @@ public class CRAutoBlueP1 extends LinearOpMode {
         }
         sleep(1000);
 
-        EncoderDrive(DRIVE_SPEED, 3,3,3,3,4.0);// Bak up from back drop
-        sleep(1000);
+        EncoderDrive(DRIVE_SPEED, 3, 3, 3, 3, 4.0);// Back up from back drop
+        sleep(500);
 
         Dropper.setPosition(0.58);
         outtakeMotor.setTargetPosition(5);
@@ -548,8 +490,8 @@ public class CRAutoBlueP1 extends LinearOpMode {
         outtakeMotor.setPower(0.75);
 
         sleep(250);
+    }
 
-    } //end dropPixel()
     public void initSpikeLift() {
         spikeLift = hardwareMap.get(Servo.class,"spikeLift");
         spikeLift.setPosition(.6);
@@ -558,18 +500,12 @@ public class CRAutoBlueP1 extends LinearOpMode {
     public void spikeLift() {
         spikeLift.setPosition(1);
 
-
     }
     public void startPosition(){
-        EncoderDrive(DRIVE_SPEED, -13,13,13,-13,4.0); // Drive forward 24 inches
+        EncoderDrive(DRIVE_SPEED, 13,-13,-13,13,4.0); // Drive forward 24 inches
         EncoderDrive(DRIVE_SPEED, 25.5,25.5,25.5,25.5,4.0); // Drive forward 24 inches
-        EncoderDrive(DRIVE_SPEED,45,-45,45,-45,4.0); // rotate 180 degrees
 
     }
 
 
-
-
-
-
-}   // end class
+} //end

@@ -29,6 +29,11 @@ public class curiosityRovers extends LinearOpMode {
     private double servody = 0.01;
     private double servoPosition = 0.58;
     double topPosition = 13308.07;
+    private double tilt_Angle = 0;
+    private double lever_On = 0.4;
+    private double lever_Off = 0;
+    private Servo droneAngleAdjuster;
+    private Servo droneLever;
 
 
     public void runOuttakeMotor(double power) {
@@ -88,6 +93,9 @@ public class curiosityRovers extends LinearOpMode {
         outtakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         outtakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        droneAngleAdjuster = hardwareMap.get(Servo.class,"droneAngleAdjuster"); // get drone servo adjuster
+        droneLever = hardwareMap.get(Servo.class, "droneLever"); // get drone servo lever
+
 
 
         //waitForStart
@@ -118,7 +126,7 @@ public class curiosityRovers extends LinearOpMode {
             if (gamepad1.left_bumper) {
                 intakePower = 0.75;
                 intakeMotor.setPower(intakePower);
-            } else if (gamepad1.a){
+            } else if (gamepad1.dpad_down){
                 intakePower = 0;
                 intakeMotor.setPower(intakePower);
             } else if (gamepad1.right_bumper) {
@@ -140,7 +148,7 @@ public class curiosityRovers extends LinearOpMode {
             }
             // Servo positions
             if (gamepad2.x) {
-                leftClaw.setPosition(0);
+                leftClaw.setPosition(1);
             } else if (gamepad2.b) {
                 leftClaw.setPosition(.52);
             }
@@ -172,12 +180,29 @@ public class curiosityRovers extends LinearOpMode {
             telemetry.update();
 
 
-
+            if (gamepad1.y) {
+                tilt_Angle = 0;
+            } else if(gamepad1.a) {
+                tilt_Angle = 0.6;
+            }
+            if (gamepad1.x) {
+                droneLever.setPosition(lever_Off);
+            } else if (gamepad1.b) {
+                droneLever.setPosition(lever_On);
+            }
+            droneAngleAdjuster.setPosition(tilt_Angle);
+            telemetry.addData("Drone Angle set to: ", droneAngleAdjuster.getPosition());
+            telemetry.addData("Drone Lever set to: ", droneLever.getPosition());
+            telemetry.update();
 
         }
 
 
     }
+
+
+
+
 
 }
 

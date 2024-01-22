@@ -4,6 +4,11 @@ import android.util.Size;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -48,10 +53,35 @@ public class CRAutoRedP1 extends LinearOpMode {
     int xMaxSMC = 300; //sets max x coord for spike mark right
     int xMinSMR = 301; //sets min x coord for spike mark center
     int xMaxSMR = 640; //sets max x coord for spike mark center
-    int RightMark = 0;
-    int CenterMark = 1;
-    int LeftMark = 2;
+    int RightMark = 4;
+    int CenterMark = 5;
+    int LeftMark = 6;
     int SpikeMarkLocation = LeftMark;
+    private DcMotor leftFront = null;
+    private DcMotor rightFront = null;
+    private DcMotor leftRear = null;
+
+    private DcMotor rightRear = null;
+
+    private DcMotor outtakeMotor = null;
+    private Servo Dropper = null;
+
+    private Servo spikeLift = null;
+
+    private ElapsedTime runtime = new ElapsedTime();
+
+    static final double COUNT_PER_REVOLUTION = 537.7; // Ticks per revolution
+
+    static final double WHEEL_DIAMETER_INCH = 3.78;
+
+    static final double GEAR_RATIO = 1.0;
+
+    static final double COUNT_PER_INCH = (COUNT_PER_REVOLUTION * GEAR_RATIO) / (WHEEL_DIAMETER_INCH * Math.PI); // conversion for ticks per inch
+    static final double DRIVE_SPEED = 0.6; // Speed when moving forward
+    static final double TURN_SPEED = 0.6; // Speed when turning
+
+    static final double STRAFE_SPEED = 0.5; // Speed when strafe
+
 
 
 
@@ -60,13 +90,20 @@ public class CRAutoRedP1 extends LinearOpMode {
     {
 
         //TFOD op mode part
+        initSpikeLift();
         initTfod();
+
+        initEncoderDrive();
+        // Initiate dropper early to keep yellow pixel in place
+        initDropper();
+        Dropper.setPosition(0.4);
 
 
         // Wait for the DS start button to be touched.
         telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
         telemetry.addData(">", "Touch Play to start OpMode");
         telemetry.update();
+
         waitForStart();
 
         if (opModeIsActive())
@@ -77,15 +114,40 @@ public class CRAutoRedP1 extends LinearOpMode {
             if(SpikeMarkLocationFinal == RightMark)
             {
                 telemetry.addLine("Path for Spike Mark Right is starting");
+                startPosition();
+                EncoderDrive(STRAFE_SPEED,-1,1,1,-1,4.0); // Strafe left
+                spikeLift();
+                EncoderDrive(TURN_SPEED,-23,23,-23,23,4.0); // Turn facing Tag
+                myTagID = 6;
+
+
 
             }
             else if (SpikeMarkLocationFinal == CenterMark)
             {
                 telemetry.addLine("Path for Spike Mark Center is starting");
+                startPosition();
+                EncoderDrive(DRIVE_SPEED,5,5,5,5,3.0); // Forward
+                EncoderDrive(STRAFE_SPEED,-16,16,16,-16,4.0); // Strafe left
+                spikeLift();
+                EncoderDrive(STRAFE_SPEED,16,-16,-16,16,4.0); // Strafe right
+                EncoderDrive(DRIVE_SPEED,-5,-5,-5,-5,3.0); // Backward
+                EncoderDrive(TURN_SPEED,-23,23,-23,23,4.0);// Turn facing
+                myTagID = 5;
             }
             else
             {
                 telemetry.addLine("Path for Spike Mark Left is starting");
+                startPosition();
+                EncoderDrive(DRIVE_SPEED,-3,-3,-3,-3,4.0); // Backward
+                EncoderDrive(STRAFE_SPEED,-25,25,25,-25,4.0);// strafe left
+                spikeLift();
+                EncoderDrive(STRAFE_SPEED,25,-25,-25,25,4.0); // strafe right
+                EncoderDrive(DRIVE_SPEED,3,3,3,3,4.0); // Forward
+                EncoderDrive(TURN_SPEED,-23,23,-23,23,4.0); // turn facing tag
+                myTagID = 4;
+
+
             }
             telemetry.update();
 
@@ -93,31 +155,54 @@ public class CRAutoRedP1 extends LinearOpMode {
 
 
 
-            //April Tag Portion of OP Mode
-            initAprilTag();
 
-            scanAprilTag();
+
+            //April Tag Portion of OP Mode
+           // initAprilTag();
+
+            //scanAprilTag();
 
 
             if(myTagID == 4)
             {
                 telemetry.addLine("ALEX: The Path for Tag ID 4 will be started");
-                //encoder code here for ID 1
+                telemetry.addLine("Approaching BackDrop");
+                EncoderDrive(DRIVE_SPEED, -19,-19,-19,-19,4.0);// Drive up to Backdrop
+                EncoderDrive(STRAFE_SPEED, 1,-1,-1,1, 3.0); // Strafe right
+                dropPixel();
+                EncoderDrive(STRAFE_SPEED,-40,40,40,-40,4.0); // Strafe left
+                EncoderDrive(DRIVE_SPEED,-7,-7,-7,-7,3.0); // Park
             }
             else if(myTagID == 5)
             {
                 telemetry.addLine("ALEX 2: The path for ID 5 will be started");
-                //encoder code here for ID 2
+                telemetry.addLine("Approaching BackDrop");
+                EncoderDrive(DRIVE_SPEED, -19,-19,-19,-19,4.0);// Drive up to Backdrop
+                EncoderDrive(STRAFE_SPEED, -2,2,2,-2, 3.0); // Strafe left
+                dropPixel();
+                EncoderDrive(STRAFE_SPEED,-30,30,30,-30, 4);// Strafe left
+                EncoderDrive(DRIVE_SPEED,-7,-7,-7,-7,3.0); // Park
+
             }
             else if(myTagID == 6)
             {
                 telemetry.addLine("Alex 3: The path for ID 6 will be started");
-                //encoder code here for ID 3
+                telemetry.addLine("Approaching BackDrop");
+                EncoderDrive(DRIVE_SPEED, -19,-19,-19,-19,4.0);// Drive up to Backdrop
+                EncoderDrive(STRAFE_SPEED, -9,9,9,-9, 3.0); // Strafe left
+                dropPixel();
+                EncoderDrive(STRAFE_SPEED,-25,25,25,-25, 4); // Strafe left
+                EncoderDrive(DRIVE_SPEED,-7,-7,-7,-7,3.0); // Park
             }
             else
             {
                 telemetry.addLine("The April Tag did not match 4,5,or 6");
-                //encoder code here for default
+                telemetry.addLine("Approaching BackDrop");
+                EncoderDrive(DRIVE_SPEED, -19,-19,-19,-19,4.0);// Drive up to Backdrop
+                EncoderDrive(STRAFE_SPEED, -2,2,2,-2, 3.0); // Strafe left
+                dropPixel();
+                EncoderDrive(STRAFE_SPEED,-30,30,30,-30, 4);// Strafe left
+                EncoderDrive(DRIVE_SPEED,-7,-7,-7,-7,3.0); // Park
             }
             telemetry.update();
 
@@ -126,7 +211,7 @@ public class CRAutoRedP1 extends LinearOpMode {
         }
 
         // Save more CPU resources when camera is no longer needed.
-        visionPortal.close();
+        //visionPortal.close();
 
     }   // end method runOpMode()
 
@@ -340,8 +425,137 @@ public class CRAutoRedP1 extends LinearOpMode {
         return SpikeMarkLocationScan;
 
     }// end scan
+    private void initEncoderDrive() {
+        //Call Motors from control hub
+        leftFront = hardwareMap.get(DcMotor.class, "leftFront");
+        rightFront = hardwareMap.get(DcMotor.class, "rightFront");
+        leftRear = hardwareMap.get(DcMotor.class, "leftRear");
+        rightRear = hardwareMap.get(DcMotor.class, "rightRear");
+
+        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightFront.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightRear.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    } //end method initEncoderDrive()
+
+    public void initDropper() {
+        outtakeMotor = hardwareMap.get(DcMotor.class, "outtakeMotor");
+        Dropper = hardwareMap.get(Servo.class, "Dropper");
+
+        outtakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        outtakeMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        outtakeMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        ;
+    } //end method initDropper
+
+    private void EncoderDrive(double Speed, double leftFrontInches, double rightFrontInches,
+                              double leftRearInches, double rightRearInches, double timeOut){
+        int leftFrontTarget;
+        int rightFrontTarget;
+        int leftRearTarget;
+        int rightRearTarget;
+
+        leftFrontTarget = leftFront.getCurrentPosition() + (int) (leftFrontInches * COUNT_PER_INCH);
+        rightFrontTarget = rightFront.getCurrentPosition() + (int) (rightFrontInches * COUNT_PER_INCH);
+        leftRearTarget = leftRear.getCurrentPosition() + (int) (leftRearInches * COUNT_PER_INCH);
+        rightRearTarget = rightRear.getCurrentPosition() + (int) (rightRearInches * COUNT_PER_INCH);
+
+        leftFront.setTargetPosition(leftFrontTarget);
+        rightFront.setTargetPosition(rightFrontTarget);
+        leftRear.setTargetPosition(leftRearTarget);
+        rightRear.setTargetPosition(rightRearTarget);
+
+        leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        leftFront.setPower(Math.abs(Speed));
+        rightFront.setPower(Math.abs(Speed));
+        leftRear.setPower(Math.abs(Speed));
+        rightRear.setPower(Math.abs(Speed));
+
+        runtime.reset();
+
+        while (opModeIsActive() &&
+                (runtime.seconds() < timeOut) &&
+                (leftFront.isBusy() && rightFront.isBusy() && leftRear.isBusy() && rightRear.isBusy())) {
+
+            // Display it for the driver.
+            telemetry.addData("Running to", " %7d :%7d", leftFrontTarget, rightFrontTarget, leftRearTarget, rightRearTarget);
+            telemetry.addData("Currently at", " at %7d :%7d",
+                    leftFront.getCurrentPosition(), rightFront.getCurrentPosition(),
+                    leftRear.getCurrentPosition(), rightRear.getCurrentPosition());
+            telemetry.update();
+        }
+
+        leftFront.setPower(0);
+        rightFront.setPower(0);
+        leftRear.setPower(0);
+        rightRear.setPower(0);
+
+        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        sleep(250);
+
+    } //end EncoderDrive()
+
+    public void dropPixel() {
+        outtakeMotor.setTargetPosition(1200);
+        outtakeMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        outtakeMotor.setPower(0.75);
+
+        while (opModeIsActive() && outtakeMotor.isBusy()) {
+            telemetry.addData("Current height: ", outtakeMotor.getCurrentPosition());
+            telemetry.update();
+        }
+        //wait for linear slides to go up then activate this code:
+
+        Dropper.setPosition(0); // Drops pixel
+        while (outtakeMotor.isBusy()) {
+            telemetry.addData("Dropping", Dropper.getPosition());
+            telemetry.update();
+        }
+        sleep(1000);
+
+        EncoderDrive(DRIVE_SPEED, 3, 3, 3, 3, 4.0);// Back up from back drop
+        sleep(500);
+
+        Dropper.setPosition(0.58);
+        outtakeMotor.setTargetPosition(5);
+        outtakeMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        outtakeMotor.setPower(0.75);
+
+        sleep(250);
+    }
+
+    public void initSpikeLift() {
+        spikeLift = hardwareMap.get(Servo.class,"spikeLift");
+        spikeLift.setPosition(.6);
+    }
+
+    public void spikeLift() {
+        spikeLift.setPosition(1);
+
+    }
+    public void startPosition(){
+        EncoderDrive(DRIVE_SPEED, 13,-13,-13,13,4.0); // Drive forward 24 inches
+        EncoderDrive(DRIVE_SPEED, 25.5,25.5,25.5,25.5,4.0); // Drive forward 24 inches
+
+    }
 
 
-
-
-}   // end class
+} //end
