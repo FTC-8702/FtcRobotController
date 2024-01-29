@@ -105,111 +105,96 @@ public class CRAutoBlueP1 extends LinearOpMode {
         Dropper.setPosition(0.4);
 
 
-        if (opModeIsActive())
-        {
+        if (opModeIsActive()) {
             int SpikeMarkLocationFinal = scanTFOD(); //for loop method where Spike Mark Location = telemetryTFOD();
 
 
-            if(SpikeMarkLocationFinal == RightMark)
-            {
+            if (SpikeMarkLocationFinal == RightMark) {
                 telemetry.addLine("Path for Spike Mark Right is starting");
                 startPosition();
-                EncoderDrive(DRIVE_SPEED,3,3,3,3,4.0); // Forward
-                EncoderDrive(STRAFE_SPEED,-1,1,1,-1,4.0); // Strafe left
+                EncoderDrive(DRIVE_SPEED, 1, 1, 1, 1, 4.0); // Forward
+                EncoderDrive(STRAFE_SPEED, -1, 1, 1, -1, 4.0); // Strafe left
                 spikeLift();
-                EncoderDrive(STRAFE_SPEED,1,-1,-1,1,4.0); // Strafe right
-                EncoderDrive(DRIVE_SPEED,-3,-3,-3,-3,4.0); // Backwards
-                EncoderDrive(TURN_SPEED,-23,23,-23,23,4.0); // Turn facing Tag
+                EncoderDrive(STRAFE_SPEED, 4, -4, -4, 4, 4.0); // Strafe right
+                EncoderDrive(DRIVE_SPEED, -3, -3, -3, -3, 4.0); // Backwards
+                EncoderDrive(TURN_SPEED, -21, 21, -21, 21, 4.0); // Turn facing Tag
                 myTagID = 1;
 
 
-            }
-            else if (SpikeMarkLocationFinal == CenterMark)
-            {
+            } else if (SpikeMarkLocationFinal == CenterMark) {
                 telemetry.addLine("Path for Spike Mark Center is starting");
                 startPosition();
-                EncoderDrive(DRIVE_SPEED,-5,-5,-5,-5,3.0); // Backward
-                EncoderDrive(STRAFE_SPEED,-16,16,16,-16,4.0); // Strafe left
+                EncoderDrive(DRIVE_SPEED,3,-3,3,-3,4.0); // rotate 180 degrees
+                EncoderDrive(DRIVE_SPEED, -6, -6, -6, -6, 3.0); // Backward
+                EncoderDrive(STRAFE_SPEED, -14, 14, 14, -14, 4.0); // Strafe left
                 spikeLift();
-                EncoderDrive(STRAFE_SPEED,16,-16,-16,16,4.0); // Strafe right
-                EncoderDrive(DRIVE_SPEED,5,5,5,5,3.0); // Forwards
-                EncoderDrive(TURN_SPEED,-23,23,-23,23,4.0);// Turn facing tag
+                EncoderDrive(STRAFE_SPEED, 14, -14, -14, 14, 4.0); // Strafe right
+                EncoderDrive(DRIVE_SPEED, 6, 6, 6, 6, 3.0); // Forwards
+                EncoderDrive(TURN_SPEED, -21, 21, -21, 21, 4.0);// Turn facing tag
                 myTagID = 2;
 
-            }
-            else
-            {
+            } else {
                 telemetry.addLine("Path for Spike Mark Left is starting");
                 startPosition();
-                EncoderDrive(DRIVE_SPEED,3,3,3,3,4.0); // forward
-                EncoderDrive(STRAFE_SPEED,-25,25,25,-25,4.0);// strafe left
+                EncoderDrive(DRIVE_SPEED, 3, 3, 3, 3, 4.0); // forward
+                EncoderDrive(STRAFE_SPEED, -25, 25, 25, -25, 4.0);// strafe left
                 spikeLift();
-                EncoderDrive(STRAFE_SPEED,25,-25,-25,25,4.0); // strafe right
-                EncoderDrive(DRIVE_SPEED,-3,-3,-3,-3,4.0); // backward
-                EncoderDrive(TURN_SPEED,-23,23,-23,23,4.0); // turn facing tag
+                EncoderDrive(STRAFE_SPEED, 25, -25, -25, 25, 4.0); // strafe right
+                EncoderDrive(DRIVE_SPEED, -3, -3, -3, -3, 4.0); // backward
+                EncoderDrive(TURN_SPEED, -20, 20, -20, 20, 4.0); // turn facing tag
                 myTagID = 3;
-
-
 
 
             }
             telemetry.update();
 
-            visionPortal2.close();
-
-
+            //visionPortal2.close();
 
 
             //April Tag Portion of OP Mode
-           // initAprilTag();
+            // initAprilTag();
 
             //scanAprilTag();
 
 
-
-
-            if(myTagID == 1)
-            {
+            if (myTagID == 1) {
                 telemetry.addLine("ALEX: The Path for Tag ID 1 will be started");
-                EncoderDrive(DRIVE_SPEED, -17,-17,-17,-17,4.0);// Drive up to Backdrop
-                EncoderDrive(STRAFE_SPEED, 5,-5,-5,5, 3.0); // strafe right
+                EncoderDrive(DRIVE_SPEED, -18, -18, -18, -18, 4.0);// Drive up to Backdrop
+                EncoderDrive(STRAFE_SPEED, 5, -5, -5, 5, 3.0); // strafe right
                 dropPixel();
-                EncoderDrive(STRAFE_SPEED,25,-25,-25,25,4.0); // strafe right
-                EncoderDrive(DRIVE_SPEED,-7,-7,-7,-7,3.0); // park
-            }
-            }
-            else if(myTagID == 2)
-            {
+                EncoderDrive(STRAFE_SPEED, 25, -25, -25, 25, 4.0); // strafe right
+                EncoderDrive(DRIVE_SPEED, -7, -7, -7, -7, 3.0); // park
+            } else if (myTagID == 2) {
                 telemetry.addLine("ALEX 2: The path for ID 2 will be started");
                 telemetry.addLine("Approaching Backdrop");
-                EncoderDrive(DRIVE_SPEED, -17,-17,-17,-17,4.0);// Drive up to Backdrop
-                EncoderDrive(STRAFE_SPEED, 2,-2,-2,2, 3.0);// strafe right
+                EncoderDrive(DRIVE_SPEED, -18, -18, -18, -18, 4.0);// Drive up to Backdrop
+                EncoderDrive(STRAFE_SPEED, 9, -9, -9, 9, 3.0);// strafe right
+                EncoderDrive(DRIVE_SPEED, -2, -2, -2, -2, 3.0); // go forward
                 dropPixel();
-                EncoderDrive(STRAFE_SPEED,30,-30,-30,30, 4);// Strafe right
-                EncoderDrive(DRIVE_SPEED,-7,-7,-7,-7,3.0); // park
-            }
-            else if(myTagID == 3)
-            {
+                EncoderDrive(STRAFE_SPEED, 34, -34, -34, 34, 4);// Strafe right
+                EncoderDrive(DRIVE_SPEED, -7, -7, -7, -7, 3.0); // park
+            } else /*if (myTagID == 3)*/ {
                 telemetry.addLine("Alex 3: The path for ID 3 will be started");
                 telemetry.addLine("Approaching Backdrop");
-                EncoderDrive(DRIVE_SPEED, -17,-17,-17,-17,4.0);// Drive up to Backdrop
-                EncoderDrive(STRAFE_SPEED, -1,1,1,-1, 3.0); // Strafe left
+                EncoderDrive(DRIVE_SPEED, -17, -17, -17, -17, 4.0);// Drive up to Backdrop
+                EncoderDrive(STRAFE_SPEED, -8, 8, 8, -8, 3.0); // Strafe left
+                EncoderDrive(DRIVE_SPEED, -3, -3, -3, -3, 3.0); // go forward
                 dropPixel();
-                EncoderDrive(STRAFE_SPEED,40,-40,-40,40, 4); // Strafe right
-                EncoderDrive(DRIVE_SPEED,-7,-7,-7,-7,3.0); // park
+                EncoderDrive(STRAFE_SPEED, 40, -40, -40, 40, 4); // Strafe right
+                EncoderDrive(DRIVE_SPEED, -7, -7, -7, -7, 3.0); // park
             }
-            else
-            {
+            /*else {
                 telemetry.addLine("The April Tag did not match 1,2,or 3");
                 telemetry.addLine("Approaching Backdrop");
-                EncoderDrive(DRIVE_SPEED, -17,-17,-17,-17,4.0);// Drive up to Backdrop
-                EncoderDrive(STRAFE_SPEED, 2,-2,-2,2, 3.0);// strafe right
+                EncoderDrive(DRIVE_SPEED, -17, -17, -17, -17, 4.0);// Drive up to Backdrop
+                EncoderDrive(STRAFE_SPEED, 2, -2, -2, 2, 3.0);// strafe right
                 dropPixel();
-                EncoderDrive(STRAFE_SPEED,30,-30,-30,30, 4);// Strafe right
-                EncoderDrive(DRIVE_SPEED,-7,-7,-7,-7,3.0); // park
+                EncoderDrive(STRAFE_SPEED, 30, -30, -30, 30, 4);// Strafe right
+                EncoderDrive(DRIVE_SPEED, -7, -7, -7, -7, 3.0); // park
 
-            }
+            }*/
             telemetry.update();
+        }
 
             //visionPortal.close();
 
@@ -539,10 +524,16 @@ public class CRAutoBlueP1 extends LinearOpMode {
         }
         sleep(1000);
 
-        EncoderDrive(DRIVE_SPEED, 3,3,3,3,4.0);// Bak up from back drop
-        sleep(1000);
 
+        EncoderDrive(DRIVE_SPEED, .5,.5,.5,.5,4.0);// Bak up from back drop
+        //EncoderDrive(DRIVE_SPEED, 1,1,1,1,4.0);// Bak up from back drop
         Dropper.setPosition(0.58);
+
+        EncoderDrive(DRIVE_SPEED, 3,3,3,3,4.0);// Bak up from back drop
+        sleep(200);
+
+
+
         outtakeMotor.setTargetPosition(5);
         outtakeMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         outtakeMotor.setPower(0.75);
@@ -561,7 +552,7 @@ public class CRAutoBlueP1 extends LinearOpMode {
 
     }
     public void startPosition(){
-        EncoderDrive(DRIVE_SPEED, -13,13,13,-13,4.0); // Drive forward 24 inches
+        EncoderDrive(DRIVE_SPEED, -13,13,13,-13,4.0); // Strafes out
         EncoderDrive(DRIVE_SPEED, 25.5,25.5,25.5,25.5,4.0); // Drive forward 24 inches
         EncoderDrive(DRIVE_SPEED,45,-45,45,-45,4.0); // rotate 180 degrees
 

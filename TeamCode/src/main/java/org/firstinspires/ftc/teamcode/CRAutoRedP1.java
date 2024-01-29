@@ -531,10 +531,12 @@ public class CRAutoRedP1 extends LinearOpMode {
         }
         sleep(1000);
 
-        EncoderDrive(DRIVE_SPEED, 3, 3, 3, 3, 4.0);// Back up from back drop
-        sleep(500);
-
+        EncoderDrive(DRIVE_SPEED, .75, .75, .75, .75, 4.0);// Back up from back drop
         Dropper.setPosition(0.58);
+
+
+        EncoderDrive(DRIVE_SPEED, 2.5, 2.5, 2.5, 2.5, 4.0);// Back up from back drop
+
         outtakeMotor.setTargetPosition(5);
         outtakeMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         outtakeMotor.setPower(0.75);

@@ -29,8 +29,8 @@ public class curiosityRovers extends LinearOpMode {
     private double servody = 0.01;
     private double servoPosition = 0.58;
     double topPosition = 13308.07;
-    private double tilt_Angle = 0;
-    private double lever_On = 0.4;
+    private double tilt_Angle = 0.15;
+    private double lever_On = 0.3;
     private double lever_Off = 0;
     private Servo droneAngleAdjuster;
     private Servo droneLever;
@@ -41,8 +41,8 @@ public class curiosityRovers extends LinearOpMode {
         outtakeMotor.setPower(power);
     }
     public void servoDefault() {
-        servoPosition = 0.58;
-        servoPosition = Range.clip(servoPosition, 0, 0.58);
+        servoPosition = 0.55;
+        servoPosition = Range.clip(servoPosition, 0, 0.55);
         Dropper.setPosition(servoPosition);
     }
     public void servoHold() {
@@ -103,6 +103,8 @@ public class curiosityRovers extends LinearOpMode {
 
         while(opModeIsActive()){
             // DRIVE CODE
+
+
 
             // Get gamepad input variables for movement
             double speed = -gamepad1.left_stick_y;
@@ -181,9 +183,9 @@ public class curiosityRovers extends LinearOpMode {
 
 
             if (gamepad1.y) {
-                tilt_Angle = 0;
+                tilt_Angle = 0.05;
             } else if(gamepad1.a) {
-                tilt_Angle = 0.6;
+                tilt_Angle = 0.15;
             }
             if (gamepad1.x) {
                 droneLever.setPosition(lever_Off);
